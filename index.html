@@ -3,10 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=index.php"> <!-- Перенаправление на index.php -->
-    <title>Перенаправление...</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Простой Мессенджер</title>
 </head>
 <body>
-    <p>Если вы не были автоматически перенаправлены, <a href="index.php">нажмите здесь</a>.</p>
+    <div class="container">
+        <h1>Простой Мессенджер</h1>
+        <div id="registration">
+            <h2>Регистрация</h2>
+            <input type="text" id="nickname" placeholder="Введите ник" required>
+            <button onclick="registerUser()">Зарегистрироваться</button>
+        </div>
+
+        <div id="chat" style="display: none;">
+            <h2>Чат</h2>
+            <div id="messages"></div>
+            <input type="text" id="messageInput" placeholder="Введите сообщение" required>
+            <button onclick="sendMessage()">Отправить</button>
+            <button onclick="logout()">Выйти</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        function registerUser() {
+            const nickname = document.getElementById('nickname').value;
+            if (nickname) {
+                localStorage.setItem('nickname', nickname);
+                currentUser = nickname;
+                document.getElementById('registration').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+                loadMessages();
+            }
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+            if (message) {
+                const messages = JSON.parse(localStorage.getItem('messages')) || [];
+                messages.push({ user: currentUser, text: message });
+                localStorage.setItem('messages', JSON.stringify(messages));
+                messageInput.value = '';
+                loadMessages();
+            }
+        }
+
+        function loadMessages() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            const messages = JSON.parse(localStorage.getItem('messages')) || [];
+            messages.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.textContent = `${msg.user}: ${msg.text}`;
+                messagesDiv.appendChild(messageElement);
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('nickname');
+            currentUser = null;
+            document.getElementById('registration').style.display = 'block';
+            document.getElementById('chat').style.display = 'none';
+        }
+
+        // Проверка, есть ли зарегистрированный пользователь
+        window.onload = function() {
+            const nickname = localStorage.getItem('nickname');
+            if (nickname) {
+                currentUser = nickname;
+                document.getElementById('registration').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+                loadMessages();
+            }
+        };
+    </script>
 </body>
 </html>
